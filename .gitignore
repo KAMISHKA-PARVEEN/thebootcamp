@@ -1,0 +1,8 @@
+# Ignore large TIFF / raster satellite data and datasets
+*.tif
+221666051/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
