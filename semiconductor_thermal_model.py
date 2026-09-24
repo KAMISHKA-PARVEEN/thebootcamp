@@ -14,13 +14,9 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 np.random.seed(42)
 
-
 print("\nELECTRONICS ML PROJECT: SEMICONDUCTOR IC TEMPERATURE PREDICTOR")
 
-
-
 # STEP 1: GENERATE & LOAD OFFICIAL-SPEC ELECTRONICS BENCHMARK DATASET
-
 # 500 samples covering realistic CPU/GPU operating conditions:
 # - Core Supply Voltage (V): 0.85V to 1.45V
 # - Clock Frequency (GHz): 1.20 GHz to 4.80 GHz
@@ -45,7 +41,7 @@ junction_temp = (
     + (0.28 * workload_pct) 
     + (0.85 * ambient_temp) 
     - (0.0072 * fan_speed) 
-    + np.random.normal(0, 1.2, n_samples)  # Realistic physical measurement noise
+    + np.random.normal(0, 1.2, n_samples)
 )
 junction_temp = np.round(junction_temp, 2)
 
@@ -65,32 +61,28 @@ dataset_filename = "semiconductor_thermal_data.csv"
 dataset.to_csv(dataset_filename, index=False)
 print(f"\n[+] Dataset successfully created and saved to '{dataset_filename}'")
 
-
 # STEP 2: EXPLORATORY DATA ANALYSIS (EDA) & STATISTICAL INSPECTION
-
 df = pd.read_csv(dataset_filename)
 
-print("\n--- 1. First 5 Rows of the Dataset ---")
+print("\n1. First 5 Rows of the Dataset:")
 print(df.head())
 
-print("\n--- 2. Dataset Shape & Column Data Types ---")
+print("\n2. Dataset Shape & Column Data Types:")
 print(f"Total Rows (Samples): {df.shape[0]}, Total Columns: {df.shape[1]}")
 print(df.info())
 
-print("\n--- 3. Statistical Summary of Hardware Metrics ---")
+print("\n3. Statistical Summary of Hardware Metrics:")
 print(df.describe().T[['mean', 'std', 'min', '50%', 'max']])
 
 # Correlation Matrix
 numeric_df = df.drop(columns=['Chip_ID'])
 correlation_matrix = numeric_df.corr()
 
-print("\n--- 4. Correlation with Silicon Junction Temperature (deg C) ---")
+print("\n4. Correlation with Silicon Junction Temperature (deg C):")
 target_corr = correlation_matrix['Junction_Temp_C'].sort_values(ascending=False)
 print(target_corr.to_string())
 
-
 # STEP 3: COMPREHENSIVE DATA VISUALIZATION (FIGURE 1: EDA DIAGNOSTICS)
-
 print("\n[+] Generating visual engineering diagnostic plots (Figure 1)...")
 
 fig = plt.figure(figsize=(15, 10))
@@ -149,9 +141,7 @@ plt.savefig("semiconductor_eda_plots.png", dpi=300)
 print("[+] Saved Figure 1 as 'semiconductor_eda_plots.png'")
 plt.show()
 
-
 # STEP 4: TRAIN-TEST SPLIT (80% TRAINING, 20% TESTING)
-
 feature_columns = ['Core_Voltage_V', 'Clock_Freq_GHz', 'Workload_Load_Pct', 'Ambient_Temp_C', 'Fan_Speed_RPM']
 X = df[feature_columns]
 y = df['Junction_Temp_C']
@@ -162,44 +152,36 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-print(f"\n--- 5. Dataset Splitting ---")
+print(f"\n5. Dataset Splitting:")
 print(f"Total Dataset Rows : {len(df)}")
 print(f"Training Rows (80%): {len(X_train)}")
 print(f"Testing Rows  (20%): {len(X_test)}")
 
-
 # STEP 5: MODEL TRAINING (MULTIPLE LINEAR REGRESSION)
-
 model = LinearRegression()
 model.fit(X_train, y_train)
 
 print("\n[+] Linear Regression Model successfully trained on hardware parameters!")
 
-
 # STEP 6: EXTRACT LEARNED PHYSICAL WEIGHTS & EQUATION
-
 intercept = model.intercept_
 coefficients = model.coef_
 
-
-print(" \nEXTRACTED ELECTRONICS REGRESSION EQUATION & FEATURE IMPORTANCE")
+print("\nEXTRACTED ELECTRONICS REGRESSION EQUATION & FEATURE IMPORTANCE")
 print(f"Baseline Constant (Intercept) = {intercept:.4f} deg C\n")
-
 print(f"{'Feature (Input Parameter)':<25} | {'Learned Weight (Slope)':<25} | {'Physical Impact'}")
-print("-" * 80)
+
 for feat, coef in zip(feature_columns, coefficients):
     direction = "HEATS UP (+)" if coef > 0 else "COOLS DOWN (-)"
     print(f"{feat:<25} | {coef:>+10.4f}               | {direction}")
 
-print("\n--- Mathematical Prediction Formula ---")
+print("\nMathematical Prediction Formula:")
 formula_str = f"Junction_Temp (deg C) = {intercept:.2f}"
 for feat, coef in zip(feature_columns, coefficients):
     formula_str += f" + ({coef:.4f} * {feat})"
 print(formula_str)
 
-
 # STEP 7: MODEL EVALUATION & ACCURACY METRICS
-
 y_pred_test = model.predict(X_test)
 
 r2 = r2_score(y_test, y_pred_test)
@@ -207,16 +189,13 @@ mae = mean_absolute_error(y_test, y_pred_test)
 mse = mean_squared_error(y_test, y_pred_test)
 rmse = np.sqrt(mse)
 
-print("\n MODEL ACCURACY & PERFORMANCE EVALUATION")
-
+print("\nMODEL ACCURACY & PERFORMANCE EVALUATION")
 print(f"R-squared Score (Accuracy Fit)  : {r2:.4f}  ({r2 * 100:.2f}% variance explained)")
 print(f"Mean Absolute Error (MAE)       : {mae:.2f} deg C")
 print(f"Root Mean Squared Error (RMSE)  : {rmse:.2f} deg C")
 print(f"Interpretation: On average, temperature predictions are accurate within +/- {mae:.2f} deg C")
 
-
 # STEP 8: RESIDUAL & ACCURACY VALIDATION PLOTS (FIGURE 2)
-
 print("\n[+] Generating evaluation & residual diagnostic plots (Figure 2)...")
 fig, (ax_eval1, ax_eval2) = plt.subplots(1, 2, figsize=(14, 5.5))
 
@@ -245,9 +224,7 @@ plt.savefig("semiconductor_evaluation_plots.png", dpi=300)
 print("[+] Saved Figure 2 as 'semiconductor_evaluation_plots.png'")
 plt.show()
 
-
 # STEP 9: REAL-TIME HARDWARE PREDICTION & SAFETY WARNING SIMULATOR
-
 def predict_chip_thermal_safety(voltage, clock_ghz, workload, ambient, fan_rpm):
     """
     Function to predict temperature and provide thermal safety alerts for electronic hardware.
@@ -274,10 +251,7 @@ def predict_chip_thermal_safety(voltage, clock_ghz, workload, ambient, fan_rpm):
         
     return predicted_temp, safety_status, action_advice
 
-
-
 print("\nHARDWARE SIMULATION & REAL-TIME THERMAL SAFETY INFERENCE")
-
 
 # Scenario A: Normal Daily Workload (Web browsing / light coding)
 test_v1, test_f1, test_l1, test_a1, test_rpm1 = 0.95, 2.4, 30.0, 24.0, 1500
@@ -297,6 +271,4 @@ print(f"Result -> Predicted Temp: {pred_t2:.2f} deg C")
 print(f"Status -> {status2}")
 print(f"Advice -> {advice2}")
 
-
-print("\n PROJECT EXECUTION COMPLETE")
-
+print("\nPROJECT EXECUTION COMPLETE")
