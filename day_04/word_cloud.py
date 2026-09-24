@@ -49,4 +49,3 @@ plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis('off')  # Hide axes
 plt.show()
 
-cv2.imwrite(wordcloud, r'C:\Users\HP\Downloads') 
